@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameOfLife.Api", "..\Api\GameOfLife.Api.csproj", "{E3DAFBCB-3B79-44F8-BEBF-C43E8350EEB1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameOfLife.Api", "Api\GameOfLife.Api.csproj", "{E3DAFBCB-3B79-44F8-BEBF-C43E8350EEB1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameOfLife.Api.Tests", "..\Api.Tests\GameOfLife.Api.Tests.csproj", "{9E104BC1-B3C3-48CE-B396-0202CC145294}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameOfLife.Api.Tests", "Api.Tests\GameOfLife.Api.Tests.csproj", "{9E104BC1-B3C3-48CE-B396-0202CC145294}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

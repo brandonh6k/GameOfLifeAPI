@@ -1,5 +1,11 @@
 
-namespace Api;
+using GameOfLife.Api.Extensions;
+using GameOfLife.Api.Interfaces;
+using GameOfLife.Api.Engines;
+using GameOfLife.Api.Repositories;
+using Neo4j.Driver;
+
+namespace GameOfLife.Api;
 
 public class Program
 {
@@ -9,38 +15,44 @@ public class Program
 
         // Add services to the container.
         builder.Services.AddAuthorization();
+        
+        // Configure Neo4j
+        var neo4jUri = builder.Configuration.GetConnectionString("Neo4j") ?? "bolt://localhost:7687";
+        var neo4jUser = builder.Configuration["Neo4j:Username"] ?? "neo4j";
+        var neo4jPassword = builder.Configuration["Neo4j:Password"] ?? "gameoflife123";
+        
+        builder.Services.AddSingleton<IDriver>(provider =>
+        {
+            return GraphDatabase.Driver(neo4jUri, AuthTokens.Basic(neo4jUser, neo4jPassword));
+        });
+        
+        // Register repository - Neo4j
+        builder.Services.AddSingleton<IBoardRepository, Neo4jBoardRepository>();
+        
+        // Register Game of Life engine
+        builder.Services.AddSingleton<IGameOfLifeEngine, ToroidalGameOfLifeEngine>();
+        
+        builder.Services.AddScoped<BoardService>();
 
-        // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-        builder.Services.AddOpenApi();
+        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
 
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
-            app.MapOpenApi();
+            app.UseSwagger();
+            app.UseSwaggerUI();
         }
 
-        app.UseAuthorization();
+        // Add global exception handling
+        app.UseJsonExceptionHandling();
 
-        var summaries = new[]
-        {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
-
-        app.MapGet("/weatherforecast", (HttpContext httpContext) =>
-        {
-            var forecast =  Enumerable.Range(1, 5).Select(index =>
-                new WeatherForecast
-                {
-                    Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    TemperatureC = Random.Shared.Next(-20, 55),
-                    Summary = summaries[Random.Shared.Next(summaries.Length)]
-                })
-                .ToArray();
-            return forecast;
-        })
-        .WithName("GetWeatherForecast");
+        // Map endpoints using extension methods
+        app.MapHealthCheckEndpoints();
+        app.MapGameOfLifeEndpoints();
 
         app.Run();
     }
