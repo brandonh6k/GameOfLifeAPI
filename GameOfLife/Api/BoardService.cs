@@ -54,7 +54,7 @@ public class BoardService
 			}
 		}
 
-		var boardId = ComputeHash(liveCells);
+		var boardId = ComputeHash(size, liveCells);
 		
 		// Check if this board already exists (since ID is content-based hash)
 		var exists = await _boardRepository.ExistsAsync(boardId);
@@ -100,7 +100,7 @@ public class BoardService
 
 		var nextLiveCells = _gameEngine.EvolveGeneration(current.Size, current.LiveCells);
 		var nextState = new BoardState(current.Size, nextLiveCells);
-		var nextId = ComputeHash(nextState.LiveCells);
+		var nextId = ComputeHash(nextState.Size, nextState.LiveCells);
 		
 		await _boardRepository.StoreBoardAsync(nextId, nextState);
 		
@@ -182,10 +182,11 @@ public class BoardService
 
 
 
-	private string ComputeHash(int[][] liveCells)
+	private string ComputeHash(int size, int[][] liveCells)
 	{
 		var sortedCells = liveCells.OrderBy(c => c[0]).ThenBy(c => c[1]);
-		var json = JsonConvert.SerializeObject(sortedCells);
+		var dataToHash = new { Size = size, LiveCells = sortedCells };
+		var json = JsonConvert.SerializeObject(dataToHash);
 		var hash = SHA256.HashData(Encoding.UTF8.GetBytes(json));
 		return Convert.ToHexString(hash);
 	}

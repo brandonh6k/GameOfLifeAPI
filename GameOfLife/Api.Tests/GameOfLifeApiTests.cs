@@ -552,5 +552,30 @@ namespace GameOfLife.Api.Tests
             responseContent.ShouldContain("outside board bounds");
         }
 
+        [Fact]
+        public async Task HashFunction_DifferentBoardSizes_ShouldGenerateDifferentHashes()
+        {
+            // Arrange - Create two boards with same relative cell patterns but different sizes
+            var smallBoard = new { 
+                size = 5,
+                liveCells = new[] { new[] { 1, 1 }, new[] { 1, 2 }, new[] { 2, 1 } } 
+            };
+            
+            var largeBoard = new { 
+                size = 100,
+                liveCells = new[] { new[] { 1, 1 }, new[] { 1, 2 }, new[] { 2, 1 } } 
+            };
+
+            // Act
+            var smallBoardId = await UploadBoard(smallBoard);
+            var largeBoardId = await UploadBoard(largeBoard);
+
+            // Assert - Different board sizes should generate different IDs even with identical cell patterns
+            smallBoardId.ShouldNotBe(largeBoardId, 
+                "Boards with same cell patterns but different sizes should have different hashes/IDs. " +
+                $"Small board (size {smallBoard.size}) ID: {smallBoardId}, " +
+                $"Large board (size {largeBoard.size}) ID: {largeBoardId}");
+        }
+
     }
 }
